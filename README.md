@@ -271,50 +271,6 @@ response = session.post(f"{BASE_URL}/api/ai/ask", json={
 answer = response.json()["answer"]
 ```
 
-## 🧪 Development
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=app --cov-report=html
-
-# Run specific test file
-pytest tests/test_documents.py
-```
-
-### Code Quality
-
-```bash
-# Format code
-black app/ tests/
-
-# Sort imports
-isort app/ tests/
-
-# Type checking
-mypy app/
-
-# Linting
-flake8 app/
-```
-
-### Database Migrations
-
-```bash
-# Create migration
-alembic revision --autogenerate -m "Add new field"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback
-alembic downgrade -1
-```
-
 ## 🌟 Why Open Source?
 
 Your document management system shouldn't be a black box. With DocumentManager you can:

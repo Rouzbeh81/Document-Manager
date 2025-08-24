@@ -322,7 +322,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-Built with ❤️ by JayRHa and fabian-peschke
+Built with ❤️ by Jannik Reinhard and Fabian Peschke
 
 ⭐ Star the repo if you find it useful — it really helps with motivation!
 

@@ -93,8 +93,8 @@ The beauty of open source? You can have this running on your machine right now:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/DocumentManager.git
-cd DocumentManager
+git clone https://github.com/JayRHa/Document-Manager.git
+cd Document-Manager
 
 # Run the setup script
 ./setup.sh prod
@@ -304,8 +304,8 @@ We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for 
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/DocumentManager.git
-cd DocumentManager
+git clone https://github.com/JayRHa/Document-Manager.git
+cd Document-Manager
 
 # Create branch
 git checkout -b feature/your-feature

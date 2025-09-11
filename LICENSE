@@ -1,63 +1,21 @@
-PROPRIETARY SOFTWARE LICENSE
+MIT License
 
-Copyright (c) 2024 JayRHa. All Rights Reserved.
+Copyright (c) 2024 jayRHa
 
-This software and associated documentation files (the "Software") are the 
-proprietary and confidential property of JayRHa and are protected by 
-copyright law and international treaties.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-NOTICE: This is proprietary software. Unauthorized copying, modification, 
-distribution, or use of this Software, in whole or in part, is strictly 
-prohibited and may result in severe civil and criminal penalties.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-NO LICENSE GRANTED
-
-No license, express or implied, by estoppel or otherwise, to any intellectual 
-property rights is granted by this notice. The Software may not be copied, 
-modified, distributed, sold, leased, sub-licensed, or used in any manner 
-without the prior written consent of JayRHa.
-
-RESTRICTIONS
-
-You may NOT:
-- Copy, reproduce, or duplicate the Software
-- Modify, adapt, or create derivative works based on the Software
-- Reverse engineer, disassemble, or decompile the Software
-- Remove or alter any proprietary notices or labels on the Software
-- Use the Software for any commercial purpose
-- Transfer, sell, rent, lease, or sublicense the Software
-- Use the Software to provide services to third parties
-- Publicly display or perform the Software
-- Use the Software in any way that violates applicable laws
-
-CONFIDENTIALITY
-
-This Software contains trade secrets and confidential information owned by 
-JayRHa. You agree to maintain the confidentiality of the Software and 
-not to disclose it to any third party.
-
-NO WARRANTY
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED. JayRHa DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO 
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND 
-NON-INFRINGEMENT.
-
-LIMITATION OF LIABILITY
-
-IN NO EVENT SHALL JayRHa BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR 
-INABILITY TO USE THE SOFTWARE.
-
-TERMINATION
-
-Any unauthorized use of the Software will result in immediate and automatic 
-termination of any rights to use the Software and may result in criminal 
-and/or civil prosecution.
-
-GOVERNING LAW
-
-This License shall be governed by the laws of the jurisdiction in which 
-JayRHa is headquartered, without regard to conflict of law principles.
-
-For licensing inquiries, please contact: JayRHa
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

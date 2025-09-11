@@ -8452,7 +8452,7 @@ async function checkFolderStructure() {
 }
 
 function installTesseract() {
-    showAlert('Installation instructions: brew install tesseract (macOS) or apt-get install tesseract-ocr (Linux)', 'info');
+    showAlert('Install Tesseract: macOS: brew install tesseract | Linux: apt-get install tesseract-ocr | Windows: winget install tesseract-ocr or choco install tesseract', 'info');
 }
 
 async function testPDFProcessing() {
@@ -8465,7 +8465,7 @@ async function testPDFProcessing() {
 }
 
 function installPoppler() {
-    showAlert('Installation instructions: brew install poppler (macOS) or apt-get install poppler-utils (Linux)', 'info');
+    showAlert('Install Poppler: macOS: brew install poppler | Linux: apt-get install poppler-utils | Windows: choco install poppler or download poppler binaries and set its bin path', 'info');
 }
 
 async function refreshFileStats() {

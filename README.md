@@ -111,6 +111,28 @@ docker run -d \
 
 The application will be available at `http://localhost:8000`
 
+### Windows Notes
+
+- Use `./setup.ps1` instead of `./setup.sh` in PowerShell:
+
+```powershell
+./setup.ps1 build
+./setup.ps1 prod
+```
+
+- Or run locally without Docker:
+
+```powershell
+python -m venv venv
+venv\Scripts\Activate
+pip install -r requirements.txt
+python cli.py serve
+```
+
+- OCR tools on Windows:
+  - Tesseract: `winget install tesseract-ocr` or `choco install tesseract`
+  - Poppler (for PDF OCR): `choco install poppler` or download binaries and set Settings.poppler_path to the poppler `bin` folder
+
 ### 🛠️ Using the Setup Script
 
 The `setup.sh` script provides an easy way to manage your DocumentManager installation:

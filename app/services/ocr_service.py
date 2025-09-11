@@ -1,3 +1,4 @@
+from loguru import logger
 import pytesseract
 from PIL import Image
 try:
@@ -5,11 +6,12 @@ try:
     PDF2IMAGE_AVAILABLE = True
 except ImportError:
     PDF2IMAGE_AVAILABLE = False
-    logger.warning("pdf2image not available. PDF OCR will be limited.")
+    # Logger is available now; warn gracefully
+    logger.warning("pdf2image not available. PDF OCR for PDFs will be limited.")
 from pathlib import Path
 from typing import Optional
 import tempfile
-from loguru import logger
+import os
 from sqlalchemy.orm import Session
 from ..config import get_settings
 
@@ -20,12 +22,17 @@ class OCRService:
     
     def _setup_tesseract(self):
         """Setup Tesseract OCR configuration"""
-        # Try multiple possible paths for tesseract
+        # Try multiple possible paths for tesseract across platforms
         possible_paths = [
-            "/opt/homebrew/bin/tesseract",  # Homebrew on Apple Silicon
-            "/usr/local/bin/tesseract",     # Homebrew on Intel Mac
-            "/usr/bin/tesseract",           # System installation
-            "tesseract"                     # In PATH
+            # macOS (Homebrew)
+            "/opt/homebrew/bin/tesseract",
+            "/usr/local/bin/tesseract",
+            "/usr/bin/tesseract",
+            # Windows typical installs
+            r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+            r"C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe",
+            # Fallback to PATH
+            "tesseract",
         ]
         
         # If a specific path is configured, try it first
@@ -52,8 +59,11 @@ class OCRService:
             logger.info(f"Using tesseract: {tesseract_cmd}")
         else:
             logger.error("No working tesseract installation found")
-            # Try to provide helpful error message
-            logger.error("Install tesseract with: brew install tesseract")
+            # Try to provide helpful error message per OS
+            if os.name == "nt":
+                logger.error("Windows install: winget install tesseract-ocr or choco install tesseract")
+            else:
+                logger.error("macOS: brew install tesseract | Linux: apt-get install tesseract-ocr")
     
     def extract_text_from_image(self, image_path: Path) -> str:
         """Extract text from an image file"""
@@ -73,17 +83,35 @@ class OCRService:
     def extract_text_from_pdf(self, pdf_path: Path) -> str:
         """Extract text from a PDF file"""
         if not PDF2IMAGE_AVAILABLE:
-            logger.error("pdf2image is not available. Please install poppler: brew install poppler")
-            raise RuntimeError("PDF OCR requires poppler to be installed. Run: brew install poppler")
+            logger.error("pdf2image is not available. Please install poppler and pdf2image")
+            if os.name == "nt":
+                logger.error("Windows poppler: choco install poppler or download binaries and set Settings.poppler_path to bin folder")
+            else:
+                logger.error("macOS: brew install poppler | Linux: apt-get install poppler-utils")
+            raise RuntimeError("PDF OCR requires poppler. Install poppler and set Settings.poppler_path if needed.")
             
         try:
             all_text = []
             
             # Convert PDF pages to images
-            pages = pdf2image.convert_from_path(
-                pdf_path,
-                poppler_path=self.settings.poppler_path if self.settings.poppler_path else None
-            )
+            # Determine poppler path if provided or auto-detect on Windows
+            poppler_path = None
+            if getattr(self.settings, "poppler_path", None):
+                poppler_path = self.settings.poppler_path
+            elif os.name == "nt":
+                # Common Windows poppler locations
+                common_poppler_bins = [
+                    r"C:\\Program Files\\poppler\\Library\\bin",
+                    r"C:\\Program Files\\poppler-23.11.0\\Library\\bin",
+                    r"C:\\Program Files\\poppler-0.68.0\\bin",
+                ]
+                for p in common_poppler_bins:
+                    if Path(p).exists():
+                        poppler_path = p
+                        logger.info(f"Using poppler at: {p}")
+                        break
+            
+            pages = pdf2image.convert_from_path(pdf_path, poppler_path=poppler_path)
             
             for i, page in enumerate(pages):
                 logger.debug(f"Processing page {i+1} of {pdf_path.name}")

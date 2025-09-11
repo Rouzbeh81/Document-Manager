@@ -7,7 +7,12 @@ import hashlib
 import mimetypes
 from pathlib import Path
 from typing import Optional, Tuple, List, Dict
-import magic
+try:
+    import magic  # python-magic (libmagic)
+    MAGIC_AVAILABLE = True
+except Exception:
+    magic = None
+    MAGIC_AVAILABLE = False
 from loguru import logger
 
 from ..models import User, Document
@@ -148,16 +153,31 @@ def validate_file_upload(
             f"File size ({file_size / 1024 / 1024:.1f}MB) exceeds limit ({max_allowed / 1024 / 1024:.1f}MB)"
         )
     
-    # Check MIME type using python-magic
+    # Check MIME type using python-magic when available; fallback otherwise
     try:
-        mime = magic.Magic(mime=True)
-        detected_mime = mime.from_buffer(content)
-        
+        detected_mime = None
+        if MAGIC_AVAILABLE:
+            mime = magic.Magic(mime=True)
+            detected_mime = mime.from_buffer(content)
+        else:
+            # Basic fallbacks using signatures and stdlib
+            try:
+                import imghdr
+                img_type = imghdr.what(None, h=content[:4096])
+                if img_type:
+                    detected_mime = mimetypes.types_map.get(f'.{img_type}', f'image/{img_type}')
+            except Exception:
+                pass
+            if not detected_mime and content[:4] == b'%PDF':
+                detected_mime = 'application/pdf'
+            if not detected_mime:
+                detected_mime = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+
         if detected_mime not in ALLOWED_MIME_TYPES:
             raise FileTypeNotAllowedError(
                 f"MIME type '{detected_mime}' not allowed"
             )
-        
+
         # Verify MIME type matches extension
         expected_mime = mimetypes.guess_type(filename)[0]
         if expected_mime and expected_mime != detected_mime:
@@ -166,12 +186,12 @@ def validate_file_upload(
                 ('application/octet-stream', 'application/pdf'),
                 ('text/plain', 'text/csv'),
             ]
-            
             if (detected_mime, expected_mime) not in allowed_mismatches:
                 logger.warning(
                     f"MIME type mismatch: detected={detected_mime}, expected={expected_mime}"
                 )
-        
+    except FileSecurityError:
+        raise
     except Exception as e:
         logger.error(f"Error checking MIME type: {e}")
         raise FileSecurityError("Could not verify file type")
@@ -259,17 +279,19 @@ def set_secure_permissions(file_path: Path, is_private: bool = True):
         is_private: Whether file should be private (owner-only access)
     """
     try:
-        if is_private:
-            # Owner read/write only (600)
-            os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR)
+        if os.name == 'posix':
+            if is_private:
+                os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR)
+            else:
+                os.chmod(
+                    file_path,
+                    stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
+                )
         else:
-            # Owner read/write, group/others read (644)
-            os.chmod(
-                file_path,
-                stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
-            )
+            # On Windows, chmod is limited; skip strict POSIX bits
+            pass
     except Exception as e:
-        logger.error(f"Failed to set file permissions: {e}")
+        logger.warning(f"Could not set strict file permissions on this platform: {e}")
 
 
 def calculate_file_hash(file_path: Path, algorithm: str = 'sha256') -> str:

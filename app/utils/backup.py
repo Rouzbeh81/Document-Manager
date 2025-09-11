@@ -473,6 +473,49 @@ def list_backups(backup_base: Optional[Path] = None) -> List[Dict[str, Any]]:
     if not backup_base:
         backup_base = Path('data/backups')
     
+    backups: List[Dict[str, Any]] = []
+    try:
+        base = Path(backup_base)
+        if not base.exists():
+            return backups
+        
+        # Find tar.gz archives
+        files = sorted(base.glob('*.tar.gz'), key=lambda p: p.stat().st_mtime, reverse=True)
+        for f in files:
+            info: Dict[str, Any] = {
+                'filename': f.name,
+                'size_mb': round(f.stat().st_size / (1024 * 1024), 2),
+            }
+            # Try to read metadata.json from archive
+            try:
+                with tarfile.open(f, 'r:gz') as tar:
+                    # metadata.json may be at root of backup folder inside tar, find it
+                    member = None
+                    for m in tar.getmembers():
+                        if m.name.endswith('/metadata.json') or m.name == 'metadata.json':
+                            member = m
+                            break
+                    if member:
+                        extracted = tar.extractfile(member)
+                        if extracted:
+                            meta = json.loads(extracted.read().decode('utf-8'))
+                            info.update({
+                                'created_at': meta.get('created_at'),
+                                'created_by': meta.get('created_by'),
+                                'statistics': meta.get('statistics', {}),
+                                'include_files': meta.get('include_files', True),
+                            })
+            except Exception as e:
+                # Don't fail listing on metadata errors
+                logger.debug(f"Could not read metadata for {f.name}: {e}")
+            
+            backups.append(info)
+        
+    except Exception as e:
+        logger.error(f"Failed to list backups: {e}")
+    
+    return backups
+
     backups = []
     
     if backup_base.exists():

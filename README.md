@@ -93,7 +93,7 @@ The beauty of open source? You can have this running on your machine right now:
 
 ```bash
 # Clone the repository
-git clone https://github.com/JayRHa/Document-Manager.git
+git clone [https://github.com/JayRHa/Document-Manager.git](https://github.com/JayRHa/Document-Manager.git)
 cd Document-Manager
 
 # Run the setup script
@@ -102,42 +102,62 @@ cd Document-Manager
 # Or manually with Docker
 docker build -t documentmanager .
 docker run -d \
+  --name documentmanager \
+  -p 8000:8000 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/storage:/app/storage \
+  documentmanager
+
+  The application will be available at http://localhost:8000
+
+⚠️ Windows Notes (Crucial Fixes)
+Op Windows 10/11 moet u Git Bash gebruiken voor de meest betrouwbare installatie. De meegeleverde shell-scripts bevatten line endings die fouten veroorzaken in Linux-containers (exec... no such file or directory error).
+
+Aanbevolen Installatieprocedure op Windows (Na git clone):
+
+Corrigeer de Line Endings in Git Bash:
+Repareer de docker-entrypoint.sh en docker-entrypoint-aio.sh scripts:
+
+Bash
+
+# Gebruik sed om de Windows-specifieke carriage return karakters te verwijderen
+sed -i 's/\r$//' docker-entrypoint.sh
+sed -i 's/\r$//' docker-entrypoint-aio.sh
+Pas de SECRET_KEY aan:
+De container crasht bij de start als de standaard SECRET_KEY niet is gewijzigd. Open het .env bestand en vervang de placeholder door een veilige, willekeurige waarde:
+
+Code snippet
+
+# Wijzig dit in het .env bestand:
+SECRET_KEY=een_unieke_en_lange_willekeurige_geheime_sleutel
+Bouw de Image op een schone manier:
+Dit zorgt ervoor dat de gecorrigeerde scripts worden meegenomen in de Docker image:
+
+Bash
+
+# Stop en verwijder eerdere mislukte containers
+docker stop documentmanager 2>/dev/null
+docker rm documentmanager 2>/dev/null
+
+# Herbouw de image
+docker build -t documentmanager .
+Start de Container:
+
+Bash
+
+docker run -d \
   --name documentmanager \
   -p 8000:8000 \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/storage:/app/storage \
   documentmanager
-```
+Controleer de status met docker ps -f name=documentmanager. De status moet Up (healthy) zijn.
 
-The application will be available at `http://localhost:8000`
+🛠️ Using the Setup Script
+The setup.sh script provides an easy way to manage your DocumentManager installation:
 
-### Windows Notes
+Bash
 
-- Use `./setup.ps1` instead of `./setup.sh` in PowerShell:
-
-```powershell
-./setup.ps1 build
-./setup.ps1 prod
-```
-
-- Or run locally without Docker:
-
-```powershell
-python -m venv venv
-venv\Scripts\Activate
-pip install -r requirements.txt
-python cli.py serve
-```
-
-- OCR tools on Windows:
-  - Tesseract: `winget install tesseract-ocr` or `choco install tesseract`
-  - Poppler (for PDF OCR): `choco install poppler` or download binaries and set Settings.poppler_path to the poppler `bin` folder
-
-### 🛠️ Using the Setup Script
-
-The `setup.sh` script provides an easy way to manage your DocumentManager installation:
-
-```bash
 # Start development environment with hot reload
 ./setup.sh dev
 
@@ -155,71 +175,65 @@ The `setup.sh` script provides an easy way to manage your DocumentManager instal
 
 # Stop all containers
 ./setup.sh stop
-```
+💻 Local Development
+Bash
 
-### 💻 Local Development
-
-```bash
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run development server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+📋 Initial Setup
+Create Admin Account
+   - Navigate to http://localhost:8000
+   - The first user registration automatically becomes admin
 
-## 📋 Initial Setup
+Configure AI Provider
+   - Go to Settings → AI Configuration
+   - Choose between OpenAI or Azure OpenAI
+   - Enter your API credentials
+   - Test the connection
 
-1. **Create Admin Account**
-   - Navigate to `http://localhost:8000`
-   - The first user registration automatically becomes admin
+Start Using
+   - Upload documents via drag-and-drop
+   - Watch AI automatically extract text, generate summaries, and categorize
+   - AI detects: Title, Summary, Correspondent, Document Type, Document Date, Tags, and Tax Relevance
+   - Use semantic search to find information instantly with natural language
 
-2. **Configure AI Provider**
-   - Go to Settings → AI Configuration
-   - Choose between OpenAI or Azure OpenAI
-   - Enter your API credentials
-   - Test the connection
-
-3. **Start Using**
-   - Upload documents via drag-and-drop
-   - Watch AI automatically extract text, generate summaries, and categorize
-   - AI detects: Title, Summary, Correspondent, Document Type, Document Date, Tags, and Tax Relevance
-   - Use semantic search to find information instantly with natural language
-
-## 🏗️ Architecture
-
-```
+🏗️ Architecture
 DocumentManager/
-├── app/                    # Backend FastAPI application
-│   ├── api/               # REST API endpoints
-│   ├── core/              # Core business logic
-│   ├── models/            # SQLAlchemy models
-│   └── services/          # AI, OCR, and storage services
-├── frontend/              # Vanilla JS frontend
-├── docker/                # Docker configuration
-├── tests/                 # Test suite
-└── docs/                  # Documentation
-```
+├── app/                    # Backend FastAPI application
+│   ├── api/               # REST API endpoints
+│   ├── core/              # Core business logic
+│   ├── models/            # SQLAlchemy models
+│   └── services/          # AI, OCR, and storage services
+├── frontend/              # Vanilla JS frontend
+├── docker/                # Docker configuration
+├── tests/                 # Test suite
+└── docs/                  # Documentation
+Technology Stack
+Backend: FastAPI, SQLAlchemy, Pydantic
 
-### Technology Stack
+AI/ML: OpenAI GPT-4, Azure OpenAI, ChromaDB
 
-- **Backend**: FastAPI, SQLAlchemy, Pydantic
-- **AI/ML**: OpenAI GPT-4, Azure OpenAI, ChromaDB
-- **OCR**: Tesseract (50+ languages)
-- **Database**: SQLite (default), PostgreSQL (production)
-- **Frontend**: Vanilla JavaScript, modern CSS
-- **Deployment**: Docker, Docker Compose
+OCR: Tesseract (50+ languages)
 
-## 🔧 Configuration
+Database: SQLite (default), PostgreSQL (production)
 
-### Environment Variables
+Frontend: Vanilla JavaScript, modern CSS
 
-Create a `.env` file in the root directory:
+Deployment: Docker, Docker Compose
 
-```bash
+🔧 Configuration
+Environment Variables
+Create a .env file in the root directory:
+
+Bash
+
 # Security - CHANGE IN PRODUCTION!
 SECRET_KEY=your-secret-key-here
 
@@ -232,30 +246,29 @@ AI_PROVIDER=openai
 OPENAI_API_KEY=sk-...
 # Or for Azure:
 # AI_PROVIDER=azure
-# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+# AZURE_OPENAI_ENDPOINT=[https://your-resource.openai.azure.com](https://your-resource.openai.azure.com)
 # AZURE_OPENAI_KEY=your-key
 
 # Application Settings
 ENVIRONMENT=production
 LOG_LEVEL=INFO
-MAX_UPLOAD_SIZE=104857600  # 100MB
+MAX_UPLOAD_SIZE=104857600  # 100MB
 ALLOWED_EXTENSIONS=pdf,jpg,jpeg,png,txt,doc,docx
 
 # Storage
 STORAGE_TYPE=local
 STORAGE_PATH=/app/data/storage
-```
-
-## 📚 API Documentation
-
-### Interactive API Docs
+📚 API Documentation
+Interactive API Docs
 Once running, access the interactive API documentation at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
 
-### Quick API Examples
+Swagger UI: http://localhost:8000/docs
 
-```python
+ReDoc: http://localhost:8000/redoc
+
+Quick API Examples
+Python
+
 import requests
 
 # Base URL
@@ -263,70 +276,78 @@ BASE_URL = "http://localhost:8000"
 
 # 1. Authentication
 response = requests.post(f"{BASE_URL}/api/auth/login", json={
-    "username": "admin",
-    "password": "your-password"
+    "username": "admin",
+    "password": "your-password"
 })
 session = requests.Session()
 session.cookies = response.cookies
 
 # 2. Upload Document
 with open("document.pdf", "rb") as f:
-    response = session.post(
-        f"{BASE_URL}/api/documents/upload",
-        files={"file": f},
-        data={"title": "Q4 Report", "tags": "finance,quarterly"}
-    )
-    document_id = response.json()["id"]
+    response = session.post(
+        f"{BASE_URL}/api/documents/upload",
+        files={"file": f},
+        data={"title": "Q4 Report", "tags": "finance,quarterly"}
+    )
+    document_id = response.json()["id"]
 
 # 3. Semantic Search
 response = session.get(f"{BASE_URL}/api/search/semantic", params={
-    "query": "What were the Q4 revenue numbers?",
-    "limit": 5
+    "query": "What were the Q4 revenue numbers?",
+    "limit": 5
 })
 results = response.json()
 
 # 4. Ask Questions
 response = session.post(f"{BASE_URL}/api/ai/ask", json={
-    "question": "Summarize the key findings from Q4 reports",
-    "document_ids": [document_id]
+    "question": "Summarize the key findings from Q4 reports",
+    "document_ids": [document_id]
 })
 answer = response.json()["answer"]
-```
-
-## 🌟 Why Open Source?
-
+🌟 Why Open Source?
 Your document management system shouldn't be a black box. With DocumentManager you can:
-- **Audit the code** - Know exactly what happens to your documents
-- **Customize for your needs** - Modify anything to fit your workflow
-- **Self-host everything** - Your documents, your rules
-- **Contribute improvements** - Join the community making document management better
+
+Audit the code - Know exactly what happens to your documents
+
+Customize for your needs - Modify anything to fit your workflow
+
+Self-host everything - Your documents, your rules
+
+Contribute improvements - Join the community making document management better
 
 No vendor lock-in. Complete transparency. Total control.
 
-## 🚀 Roadmap
-
+🚀 Roadmap
 The foundation is solid, but we're just getting started:
-- **Self-hosted AI models** - Run everything locally
-- **Mobile apps** - For on-the-go access and document scanning
-- **Workflow automation** - Documents that route themselves
-- **Advanced analytics** - Insights from your document repository
-- **Plugin system** - Custom integrations for your needs
 
-## 🤝 Contributing
+Self-hosted AI models - Run everything locally
 
-We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Mobile apps - For on-the-go access and document scanning
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Workflow automation - Documents that route themselves
 
-### Development Setup
+Advanced analytics - Insights from your document repository
 
-```bash
+Plugin system - Custom integrations for your needs
+
+🤝 Contributing
+We love contributions! Please see our Contributing Guide for details.
+
+Fork the repository
+
+Create your feature branch (git checkout -b feature/AmazingFeature)
+
+Commit your changes (git commit -m 'Add some AmazingFeature')
+
+Push to the branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+Development Setup
+Bash
+
 # Clone your fork
-git clone https://github.com/JayRHa/Document-Manager.git
+git clone [https://github.com/JayRHa/Document-Manager.git](https://github.com/JayRHa/Document-Manager.git)
 cd Document-Manager
 
 # Create branch
@@ -335,18 +356,14 @@ git checkout -b feature/your-feature
 # Install pre-commit hooks
 pip install pre-commit
 pre-commit install
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 <div align="center">
 Built with ❤️ by Jannik Reinhard and Fabian Peschke
 
 ⭐ Star the repo if you find it useful — it really helps with motivation!
 
-☕ If you want to support the project, you can [buy us a coffee](https://www.buymeacoffee.com/your-link)
+☕ If you want to support the project, you can buy us a coffee
+
 </div>
